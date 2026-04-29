@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>フォームのバリデーション</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/all.min.js" defer></script>
+  <script src="formValidation.js" defer></script>
+</head>
+<body>
+  <div class="p-4">
+    <h1 class="text-2xl font-bold mb-6 text-center">フォームのバリデーション</h1>
+    <form id="validateForm">
+      <div class="m-auto form mb-8 md:max-w-xl grid gap-4">
+        <div>
+          <label class="text-sm font-medium mb-2">ユーザー名</label>
+          <input type="text" name="username" placeholder="ユーザー名" class="input flex-1" id="username">
+          <p id="username-error" class="text-red-500 text-sm mt-2"></p>
+        </div>
+        <div>
+          <label class="text-sm font-medium mb-2">メールアドレス</label>
+          <input type="email" name="email" placeholder="メールアドレス" class="input flex-1" id="email">
+          <p id="email-error" class="text-red-500 text-sm mt-2"></p>
+        </div>
+        <div>
+          <label class="text-sm font-medium mb-2">パスワード</label>
+          <input type="password" name="password" placeholder="パスワード" class="input flex-1" id="password">
+          <p id="password-error" class="text-red-500 text-sm mt-2"></p>
+        </div>
+      </div>
+      <div class="m-auto md:max-w-xs grid gap-4">
+        <button type="submit" class="btn btn-primary font-bold text-base bg-sky-600">登録する</button>
+        <button type="reset" class="btn btn-secondary font-bold text-base text-white bg-neutral-500">リセット</button>
+      </div>
+    </form>
+    <div id="result" class="m-auto md:max-w-xl mt-8">
+      <p id="result-text" class="text-center text-blue-500 font-bold"></p>
+    </div>
+  </div>
+</body>
+</html>
