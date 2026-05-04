@@ -45,3 +45,82 @@ jsファイルで、書き出しに `window.addEventListener('DOMContentLoaded',
 defer を付けると、HTMLの解析が完了してからスクリプトを実行するという動作になるので、</body> 直前に置くのとほぼ同じ効果になります。
 
 現在の主流は <head> 内に defer 付きで書く方法です。</body> 直前に置く方法は古いやり方で、どちらでも動きますが、defer の方がHTMLの構造として整理されていて好まれます。
+
+## `DOMContentLoaded` と `window.onload` の違い
+
+DOMContentLoaded は発火するタイミングが異なります。
+
+```txt
+イベントの発火タイミング
+
+HTMLの受信・解析開始
+       ↓
+DOM構築完了（ツリー化）
+       ↓
+defer 属性付きはここで実行される
+       ↓
+DOMContentLoaded 発火  ← DOM操作はここから可能
+       ↓
+画像・CSS・外部リソースの読み込み完了
+       ↓
+load 発火
+```
+
+```js
+// DOM構築が終わった時点で発火（画像等の読み込みを待たない）
+document.addEventListener("DOMContentLoaded", (event) => {
+  console.log("DOM ready");
+}
+
+// 画像・CSS等すべてのリソースが読み込み完了してから発火
+window.addEventListener("load", (event) => {
+  console.log("All resources loaded");
+}
+```
+
+使い分け
+
+- DOMContentLoaded — ボタンにクリックイベントをつける、要素のテキストを書き換える等、DOM操作が目的ならこちらが最適。ページ表示が速くなる
+- load — 画像の幅・高さを取得したい等、外部リソースの読み込み完了が必要な場合に使う
+
+実務では多くの場合 DOMContentLoaded で十分です。
+
+VanillaJSのコードを書く際、最初にDOMContentLoadedの記述があった方が良いのか？
+
+結論から言うと、<script> タグの配置次第です。
+
+実務では `<head>` に defer をつけて配置 するか、`</body>` 直前に配置 するのが一般的なので、DOMContentLoaded を毎回書く必要はない
+
+```html
+<!-- <script> を </body> の直前に置く場合（現在の主流） -->
+...
+  <script src="app.js"></script>  <!-- DOM構築後に実行される -->
+</body>
+...
+<!-- この場合、スクリプト実行時にはすでにDOMが構築済みなので DOMContentLoaded は不要 -->
+```
+
+```html
+<!-- <script> を <head> 内に置く場合 -->
+...
+  <script src="app.js"></script>
+</head>
+...
+<!-- この場合、DOM構築前に実行されるため、要素がまだ存在しません。DOMContentLoaded で囲む必要がある -->
+```
+
+```js
+// app.js — 囲まないと要素が取得できない
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btn");
+  btn.addEventListener("click", () => { ... });
+}
+```
+
+```html
+<!-- defer 属性を使う場合（モダンな方法） -->
+...
+  <script src="app.js" defer></script>
+</head>
+<!-- defer はDOM構築完了後に実行されることが保証されるので、DOMContentLoaded は不要です。<head> に書けて、かつ囲む必要もないので便利 -->
+```
