@@ -30,10 +30,9 @@ async function fetchWeatherData(city) {
       throw new Error(`レスポンスステータス: ${response.status}`);
     }
     const data = await response.json();
-    console.log(data);
+    return data;
   } catch (error) {
     console.error("エラー:", error);
   }
 }
-// const weatherData = await fetchWeatherData("tokyo");
-await fetchWeatherData("tokyo");
+const weatherData = await fetchWeatherData("tokyo");
