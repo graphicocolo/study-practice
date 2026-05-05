@@ -103,7 +103,7 @@ https://api.openweathermap.org/data/2.5/weather?id=2643743&units=metric&lang=ja&
 > OpenWeatherMapで都市名を使って天気を取得するには、APIリクエストのqパラメータに「都市名,国コード」を英数字（ローマ字）で指定します（例: Tokyo,JP）。より正確に指定したい場合は、公式city.list.json.gzを使用して正確な都市IDを取得することをお勧めします。
 
 ```zsh
-curl 'https://api.openweathermap.org/data/2.5/weather?zip=169-0072,JP&appid=8cb38ffe7c3aa1bf0955195e5ab02bf7&lang=ja&units=metric' | python3 -m json.tool
+curl 'https://api.openweathermap.org/data/2.5/weather?zip=169-0072,JP&appid={APIキー}&lang=ja&units=metric' | python3 -m json.tool
 ```
 
 ```txt
@@ -126,16 +126,20 @@ response
 
 ## フェーズ2：ファイル構成・基本実装
 
-- [ ] ファイルを作成する ← **今ここを作業中**  🔥 現在地
+### 仕様
+
+都市名を入力して検索すると、現在の天気・気温・天気アイコンを表示する
+
+- [x] ファイルを作成する
   ```
   weather/
     index.html
     style.css
     app.js
   ```
-- [ ] HTML に検索フォーム（入力欄 + ボタン）と、結果表示エリアを作る
-- [ ] `fetch` でAPIを呼び出し、コンソールにレスポンスを表示できる状態にする
-- [ ] `async / await` で非同期処理を書く
+- [x] HTML に検索フォーム（入力欄 + ボタン）と、結果表示エリアを作る
+- [x] `fetch` でAPIを呼び出し、コンソールにレスポンスを表示できる状態にする
+- [x] `async / await` で非同期処理を書く ← **今ここを作業中**  🔥 現在地
 
 ---
 
