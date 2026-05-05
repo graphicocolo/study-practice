@@ -33,8 +33,6 @@ list-theme.md
 challenge*/
 sample*/
 training*/
-# drizzle.config.ts
-# /src/db
 
 # debug
 npm-debug.log*
@@ -44,6 +42,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+
+# API keys
+/javascript/practice/weather/constants.js
 
 # vercel
 .vercel
