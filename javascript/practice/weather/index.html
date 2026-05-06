@@ -21,18 +21,18 @@
         </div>
       </div>
       <div class="m-auto md:max-w-[200px] grid gap-4">
-        <button type="submit" class="btn btn-primary font-bold text-base bg-sky-600">天気を確認</button>
-        <button type="reset" class="btn btn-secondary font-bold text-base text-white bg-neutral-500">リセット</button>
+        <button type="submit" class="btn btn-primary font-bold text-base cursor-pointer">天気を確認</button>
+        <button type="reset" class="btn btn-secondary font-bold text-base text-white bg-neutral-400">リセット</button>
       </div>
     </form>
-    <div id="display-weather" class="m-auto md:max-w-xl md:grid md:grid-cols-2 gap-4 mt-10 bg-sky-50 px-4 py-8 rounded">
-      <div>
-        <h2 class="text-lg text-center text-neutral-700 font-bold mb-2">現在の天気</h2>
-        <p class="text-center text-sky-700 font-bold"><span class="text-3xl" id="weather-condition">晴れ</span> 天気アイコン</p>
+    <div id="display-weather" class="m-auto md:max-w-xl mt-10 bg-taupe-200 px-4 py-8 rounded hidden">
+      <h2 class="text-lg text-center text-neutral-700 font-bold mb-2"><span id="city-name"></span>の天気</h2>
+      <div class="md:flex md:items-center md:justify-center gap-4">
+        <p class="text-center text-3xl text-sky-700 font-bold" id="weather-condition"></p>
+        <p class="text-center text-sky-700 font-bold"><span class="text-4xl" id="temperature"></span><span class="text-lg">°C</span></p>
       </div>
-      <div>
-        <h2 class="text-lg text-center text-neutral-700 font-bold mb-2">気温</h2>
-        <p class="text-center text-sky-700 font-bold"><span class="text-4xl" id="temperature">25</span><span class="text-lg">°C</span></p>
+      <div class="text-center">
+        <p id="weather-icon" class="inline-block"></p>
       </div>
     </div>
     <div class="m-auto md:max-w-xl">
