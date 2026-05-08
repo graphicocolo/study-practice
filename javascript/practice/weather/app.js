@@ -1,12 +1,11 @@
 import { API_KEY } from "./constants.js";
 // コードの構成
 // 1. HTML要素を取得
-// 2. API呼び出し
+// 2. API呼び出し、天気アイコン数値配列定義
 // 3. 各関数を作成
 //  - submit ボタン状態の切り替え setSubmitEnabled()
 //  - 天気エリア表示判定 weatherDisplayIsVisible()
 //  - 空文字バリデーション validateNotEmpty()
-//  - ステータスバリデーション notIsValidateStatus()
 // 4. イベントリスナー
 //  - input
 //  - blur
@@ -24,6 +23,8 @@ const weatherForm = document.querySelector("#weather-form");
 const submitButton = document.querySelector("button[type='submit']");
 /** @type {HTMLButtonElement | null} */
 const resetButton = document.querySelector("button[type='reset']");
+/** @type {HTMLParagraphElement | null} */
+const loadingElement = document.querySelector('#loading');
 /** @type {HTMLDivElement | null} */
 const weatherDisplayElement = document.querySelector('#display-weather');
 /** @type {HTMLParagraphElement | null} */
@@ -37,18 +38,43 @@ const weatherIconElement = document.querySelector('#weather-icon');
 
 // 2. API呼び出し
 async function fetchWeatherData(city) {
+  loadingElement.children[0].textContent = "天気情報を読み込み中...";
+  let isLoading = true;
+  loadingElement.classList.toggle("hidden", !isLoading);
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=ja&appid=${API_KEY}`;
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      notIsValidateStatus();
+      setTimeout(() => {
+        loadingElement.children[0].textContent = "";
+        isLoading = false;
+        loadingElement.classList.toggle("hidden", !isLoading);
+        notIsValidateStatus(); // 関数は不要
+      }, 1000);
+      // loadingElement.children[0].textContent = "";
+      // isLoading = false;
+      // loadingElement.classList.toggle("hidden", !isLoading);
+      // notIsValidateStatus(); // 関数は不要
       throw new Error(`レスポンスステータス: ${response.status}`);
     }
+    // コンソールエラーが残っていたら、削除する処理を挟みたい
     const data = await response.json();
     return data;
   } catch (error) {
     console.error("エラー:", error);
+  } finally {
+    setTimeout(() => {
+      loadingElement.children[0].textContent = "";
+      isLoading = false;
+      loadingElement.classList.toggle("hidden", !isLoading);
+    }, 2000);
   }
+}
+// 2. 天気アイコン数値配列定義
+const weatherConditions = {
+  clear: ["01", "02"],
+  clouds: ["03", "04", "09", "10", "11", "50"],
+  snow: "13"
 }
 
 // 3. 各関数を作成
@@ -122,6 +148,8 @@ weatherForm.addEventListener("submit", async (event) => {
   weatherConditionElement.textContent = "";
   temperatureElement.textContent = "";
   weatherIconElement.replaceChildren();
+  const bgStyleClasses = ["bg-sky-100", "bg-gray-200", "bg-slate-100", "bg-neutral-100"];
+  weatherDisplayElement.classList.remove(...bgStyleClasses);
 
   const city = cityInput.value.trim();
   const weatherData = await fetchWeatherData(city);
@@ -129,14 +157,29 @@ weatherForm.addEventListener("submit", async (event) => {
   weatherConditionElement.textContent = weatherData.weather[0].description;
   temperatureElement.textContent = weatherData.main.temp;
   const iconCode = weatherData.weather[0].icon;
+  const weatherCategory = iconCode.slice(0, 2);
+  if (weatherConditions.clear.includes(weatherCategory)) {
+    weatherDisplayElement.classList.add("bg-sky-100");
+  } else if (weatherConditions.clouds.includes(weatherCategory)) {
+    weatherDisplayElement.classList.add("bg-gray-200");
+  } else if (weatherConditions.snow === weatherCategory) {
+    weatherDisplayElement.classList.add("bg-slate-100");
+  } else {
+    weatherDisplayElement.classList.add("bg-neutral-100");
+  }
   const iconElement = document.createElement("img");
   iconElement.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
   weatherIconElement.appendChild(iconElement);
-  weatherDisplayElement.classList.remove("hidden");
+  setTimeout(() => {
+    weatherDisplayElement.classList.remove("hidden");
+    cityInput.value = "";
+    setSubmitEnabled(false);
+  }, 2000);
+  // weatherDisplayElement.classList.remove("hidden");
 
   // 後処理
-  cityInput.value = "";
-  setSubmitEnabled(false);
+  // cityInput.value = "";
+  // setSubmitEnabled(false);
 })
 
 weatherForm.addEventListener("reset", () => {
