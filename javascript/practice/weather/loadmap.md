@@ -234,8 +234,8 @@ fetch（通信）
 
 ## フェーズ6：GitHub Pages でデプロイ
 
-- [ ] GitHubリポジトリを作成する（例：`weather-app`）
-- [ ] コードをプッシュする
+- [x] GitHubリポジトリを作成する（例：`weather-app`） ← **今このテーマを学習中**  🔥 現在地
+- [x] コードをプッシュする
 - [ ] GitHub Pages を有効にして URL を確認する
 - [ ] README.md を書く
   - 何ができるアプリか

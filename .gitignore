@@ -33,6 +33,7 @@ list-theme.md
 challenge*/
 sample*/
 training*/
+/other/github-security.md
 
 # debug
 npm-debug.log*
@@ -45,6 +46,7 @@ yarn-error.log*
 
 # API keys
 /javascript/practice/weather/constants.js
+/javascript/practice/weather/deployment.md
 
 # vercel
 .vercel

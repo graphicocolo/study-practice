@@ -1,7 +1,7 @@
 import { API_KEY } from "./constants.js";
 // コードの構成
 // 1. HTML要素を取得
-// 2. API呼び出し、天気アイコン数値配列定義
+// 2. API呼び出し、天気アイコン数値配列定義、天気表示エリア背景色配列定義
 // 3. 各関数を作成
 //  - submit ボタン状態の切り替え setSubmitEnabled()
 //  - 天気エリア表示判定 weatherDisplayIsVisible()
@@ -39,43 +39,35 @@ const weatherIconElement = document.querySelector('#weather-icon');
 // 2. API呼び出し
 async function fetchWeatherData(city) {
   loadingElement.children[0].textContent = "天気情報を読み込み中...";
-  let isLoading = true;
-  loadingElement.classList.toggle("hidden", !isLoading);
+  loadingElement.classList.remove("hidden");
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=ja&appid=${API_KEY}`;
   try {
     const response = await fetch(url);
-    if (!response.ok) {
-      setTimeout(() => {
-        loadingElement.children[0].textContent = "";
-        isLoading = false;
-        loadingElement.classList.toggle("hidden", !isLoading);
-        notIsValidateStatus(); // 関数は不要
-      }, 1000);
-      // loadingElement.children[0].textContent = "";
-      // isLoading = false;
-      // loadingElement.classList.toggle("hidden", !isLoading);
-      // notIsValidateStatus(); // 関数は不要
-      throw new Error(`レスポンスステータス: ${response.status}`);
+    if (response.status === 404) {
+      cityInputError.textContent = "入力された都市名が見つかりませんでした";
+      return null;
     }
-    // コンソールエラーが残っていたら、削除する処理を挟みたい
+    if (!response.ok) {
+      throw new Error(`HTTP: ${response.status}`);
+    }
     const data = await response.json();
     return data;
   } catch (error) {
     console.error("エラー:", error);
+    return null;
   } finally {
-    setTimeout(() => {
-      loadingElement.children[0].textContent = "";
-      isLoading = false;
-      loadingElement.classList.toggle("hidden", !isLoading);
-    }, 2000);
+    loadingElement.children[0].textContent = "";
+    loadingElement.classList.add("hidden");
   }
 }
 // 2. 天気アイコン数値配列定義
 const weatherConditions = {
   clear: ["01", "02"],
   clouds: ["03", "04", "09", "10", "11", "50"],
-  snow: "13"
+  snow: ["13"]
 }
+// 2. 天気表示エリア背景色配列定義
+const bgStyleClasses = ["bg-sky-100", "bg-gray-200", "bg-slate-100", "bg-neutral-100"];
 
 // 3. 各関数を作成
 /**
@@ -108,31 +100,20 @@ function validateNotEmpty(element) {
   return element.value.trim() !== "";
 }
 
-/**
- * ステータスバリデーション
- */
-function notIsValidateStatus() {
-  cityInputError.textContent = "入力された都市名が見つかりませんでした";
-}
-
 // 4. イベントリスナー
 cityInput.addEventListener("input", () => {
   const isValid = validateNotEmpty(cityInput);
   setSubmitEnabled(isValid);
   isValid && (cityInputError.textContent = "");
-  if (weatherDisplayIsVisible()) {
-    weatherDisplayElement.classList.add("hidden");
-  }
+  weatherDisplayIsVisible() && (weatherDisplayElement.classList.add("hidden"));
 })
 
 cityInput.addEventListener("blur", () => {
   const isValid = validateNotEmpty(cityInput);
   !isValid && (cityInputError.textContent = "都市名を入力してください");
   isValid && (setSubmitEnabled(true), cityInputError.textContent = "");
-  // weatherDisplayElement が表示されている間はフォーカスが外れてもエラーを出さないようにしたい
-  if (weatherDisplayIsVisible()) {
-    cityInputError.textContent = "";
-  }
+  // weatherDisplayElement が表示されている間はフォーカスが外れてもエラーを出さないようにする
+  weatherDisplayIsVisible() && (cityInputError.textContent = "");
 })
 
 weatherForm.addEventListener("submit", async (event) => {
@@ -143,43 +124,48 @@ weatherForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  // いったん前に表示されていたアイコン要素をリセットする必要がある
+  // API 呼び出し前に前回の結果をリセット
   cityNameElement.textContent = "";
   weatherConditionElement.textContent = "";
   temperatureElement.textContent = "";
   weatherIconElement.replaceChildren();
-  const bgStyleClasses = ["bg-sky-100", "bg-gray-200", "bg-slate-100", "bg-neutral-100"];
   weatherDisplayElement.classList.remove(...bgStyleClasses);
 
+  // API 呼び出し、各種データセット
   const city = cityInput.value.trim();
   const weatherData = await fetchWeatherData(city);
+  if (!weatherData) return;
   cityNameElement.textContent = weatherData.name;
   weatherConditionElement.textContent = weatherData.weather[0].description;
   temperatureElement.textContent = weatherData.main.temp;
   const iconCode = weatherData.weather[0].icon;
+
+  // 天気表示エリア背景色切り替え
   const weatherCategory = iconCode.slice(0, 2);
   if (weatherConditions.clear.includes(weatherCategory)) {
-    weatherDisplayElement.classList.add("bg-sky-100");
+    weatherDisplayElement.classList.add(bgStyleClasses[0]);
   } else if (weatherConditions.clouds.includes(weatherCategory)) {
-    weatherDisplayElement.classList.add("bg-gray-200");
-  } else if (weatherConditions.snow === weatherCategory) {
-    weatherDisplayElement.classList.add("bg-slate-100");
+    weatherDisplayElement.classList.add(bgStyleClasses[1]);
+  } else if (weatherConditions.snow.includes(weatherCategory)) {
+    weatherDisplayElement.classList.add(bgStyleClasses[2]);
   } else {
-    weatherDisplayElement.classList.add("bg-neutral-100");
+    weatherDisplayElement.classList.add(bgStyleClasses[3]);
   }
+
+  // 天気アイコン切り替え
   const iconElement = document.createElement("img");
   iconElement.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-  weatherIconElement.appendChild(iconElement);
-  setTimeout(() => {
+  iconElement.onload = () => {
+    weatherIconElement.appendChild(iconElement);
     weatherDisplayElement.classList.remove("hidden");
-    cityInput.value = "";
-    setSubmitEnabled(false);
-  }, 2000);
-  // weatherDisplayElement.classList.remove("hidden");
+  }
+  iconElement.addEventListener("error", () => {
+    weatherDisplayElement.classList.remove("hidden");
+  })
 
   // 後処理
-  // cityInput.value = "";
-  // setSubmitEnabled(false);
+  cityInput.value = "";
+  setSubmitEnabled(false);
 })
 
 weatherForm.addEventListener("reset", () => {
