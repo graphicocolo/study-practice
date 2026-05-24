@@ -236,11 +236,15 @@ fetch（通信）
 
 - [x] GitHubリポジトリを作成する（例：`weather-app`） ← **今このテーマを学習中**  🔥 現在地
 - [x] コードをプッシュする
-- [ ] GitHub Pages を有効にして URL を確認する
-- [ ] README.md を書く
+- [x] GitHub Pages を有効にして URL を確認する
+- [x] README.md を書く
   - 何ができるアプリか
-  - 使った技術
   - デモ URL
+  - スクショ（任意）
+  - 使った技術
+  - 機能一覧
+
+[全プロジェクトで重宝されるイケてるREADMEを作成しよう！](https://qiita.com/shun198/items/c983c713452c041ef787)
 
 ---
 
