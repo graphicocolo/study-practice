@@ -19,6 +19,15 @@ HTML フォーム → fetch → Claude API → 回答を DOM に表示
 - ポイント：API キーを `.env` ではなく直書きしない（GitHubに上げない）
 - 参考：[Anthropic API ドキュメント](https://docs.anthropic.com)
 
+同じAnthropicアカウントで両方ログインできる
+
+- claude.ai → Claudeをチャットで使うUI
+- [Claude Console](https://platform.claude.com/login) → APIキーの発行・使用量の確認などの開発者向け管理画面 AIモデル「Claude」を自身のアプリやシステムに組み込むための開発者向けプラットフォーム（管理画面）
+
+Gemini を使うため、次回調査
+
+[4. LLM API キーの取得](https://zenn.dev/shinseitaro/books/crewai-hands-on/viewer/setup#4.-llm-api-キーの取得)
+
 ---
 
 ### 2. 天気 + AI コメント
