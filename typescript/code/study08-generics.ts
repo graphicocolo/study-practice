@@ -41,6 +41,11 @@ textAccept();
 
 // <T> はジェネリクスを表す慣習的な書き方
 // T は "Type" の頭文字で、型の仮引数によく使われる名前です。ただし T である必要はなく、任意の名前が使えます
+
+// undefined 判定が必要なわけ
+// first(); // そもそも関数を呼べない 関数を呼び出すが中まで到達せずエラー
+// first([]); // undefined が返る これが | undefinedが必要な理由
+
 function first<T>(arr: Array<T>): T | undefined {
   // if (!arr[0]) return; // 先頭要素が truthy かどうか確認したい、ということになる
   // [0] の場合 undefined になってしまう
@@ -66,6 +71,9 @@ first([]);
 // }
 // undefined チェックが不要です
 // pair("hello", 42) のように呼び出す限り、v1 と v2 は必ず渡されます。undefined になるケースがないので、チェックなしで [T, U] を返すだけで完結します。
+
+// pair() のように引数なしで呼び出すと、TypeScript がその時点でエラーにする
+// 関数の中まで到達しないので、undefined を返す処理は実行されません。「関数の中で undefined が返り得るか」ではなく「そもそも呼び出し自体がエラー」になります。
 
 // 修正後
 function pair<T, U>(v1: T, v2: U): [T, U] {
