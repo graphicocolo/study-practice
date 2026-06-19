@@ -55,7 +55,16 @@ study11-utility-types.ts
 | `readonly` | オブジェクトのプロパティ | 不可 | 変更できる |
 
 どちらも「参照」を固定するだけで、オブジェクトの中身の変更（ミューテーション）は防げない。
-中身ごと凍らせたいなら `Object.freeze()` または全プロパティを `readonly` にする。
+中身ごと凍らせたいなら `Object.freeze()` にする。
+
+```js
+const config = Object.freeze({ apiUrl: "...", timeout: 10 });
+config.timeout = 5; // tsx でも実行時に無視される（strictモードでは例外）
+```
+
+readonly は TypeScript が見ている間だけ有効な制約
+
+JavaScript 実行時には動作はしない
 
 ---
 
