@@ -1,248 +1,222 @@
-# TypeScript ユーティリティ型（Utility Types）
+# 課題：`Partial` / `Required` / `Pick` / `Omit` / `Record` / `readonly`
 
-## 今日のゴール
-
-- `readonly` / `Partial` / `Required` / `Pick` / `Omit` / `Record` を使い分けられる
-- 既存の型を変形・再利用する発想が身につく
+**目標：** TypeScript が標準提供するユーティリティ型を使って、既存の型を「加工・再利用」する発想を身につける
 
 ---
 
-## ユーティリティ型とは
+## 準備
 
-TypeScript が標準で用意している「型を加工するツール」。
-`type` を一から書き直さずに、既存の型をベースに変形できる。
+`study-practice/typescript/code/` に新しいファイルを作成：
 
-```ts
-type User = { id: number; name: string; email: string };
-
-// User の全プロパティを省略可能にした型が作れる
-type PartialUser = Partial<User>;
-// → { id?: number; name?: string; email?: string }
+```
+study11-utility-types.ts
 ```
 
 ---
 
-## 1. `readonly`
+## 前提知識
 
-プロパティを**読み取り専用**にする。変更しようとするとコンパイルエラーになる。
+ユーティリティ型とは「型を受け取って別の型を返す、TypeScript 標準のツール」。
+一から書き直さず、既存の型をベースに変形できる。
 
-```ts
-type Point = { readonly x: number; readonly y: number };
-
-const p: Point = { x: 10, y: 20 };
-p.x = 99; // エラー：読み取り専用プロパティに代入できない
-```
-
-### 練習1
-
-次の型を使って、変更不可な設定オブジェクトを定義してください。
-
-```ts
-type Config = {
-  // TODO: apiUrl と timeout を readonly で定義する
-};
-
-const config: Config = { apiUrl: "https://api.example.com", timeout: 3000 };
-// config.apiUrl = "other"; ← これがエラーになればOK
-```
+| 型 | 効果 | よく使う場面 |
+|---|---|---|
+| `readonly` | プロパティを変更不可にする | 設定値・定数オブジェクト |
+| `Partial<T>` | 全プロパティをオプション（`?`）にする | 更新リクエストの入力型 |
+| `Required<T>` | 全プロパティを必須にする（`Partial` の逆） | バリデーション後の確定型 |
+| `Pick<T, K>` | 指定したプロパティだけ残す | 外部公開・表示用の型 |
+| `Omit<T, K>` | 指定したプロパティだけ除く | 機密フィールドの除去 |
+| `Record<K, V>` | キーと値の型を指定してオブジェクト型を作る | 辞書・マップ構造 |
 
 ---
 
-## 2. `Partial<T>`
+## やること
 
-型 `T` の全プロパティを**省略可能（optional）**にする。
+### ① `readonly` の挙動を確認する
 
 ```ts
-type User = { id: number; name: string; email: string };
-type PartialUser = Partial<User>;
-// → { id?: number; name?: string; email?: string }
+// 以下の型を定義する
+// type Config = { apiUrl: string; timeout: number }
+
+// readonly をつけたバージョン ReadonlyConfig も定義する
+
+// ReadonlyConfig のオブジェクトを作り、プロパティに再代入してみる
+// → TypeScript はエラーを出すか？
+
+// ポイント：readonly はあくまでコンパイル時の制約。
+// JavaScript に変換されると readonly は消える（実行時には変更できてしまう）
 ```
 
-**よく使う場面：** 更新処理（全フィールドを送らなくていいケース）
+**`readonly` と `const` の違い**
 
-### 練習2
+| | 対象 | 再代入 | ネストした値 |
+|---|---|---|---|
+| `const` | 変数 | 不可 | 変更できる |
+| `readonly` | オブジェクトのプロパティ | 不可 | 変更できる |
 
-次の関数の引数に `Partial` を使って、部分的な更新ができるようにしてください。
+どちらも「参照」を固定するだけで、オブジェクトの中身の変更（ミューテーション）は防げない。
+中身ごと凍らせたいなら `Object.freeze()` または全プロパティを `readonly` にする。
+
+---
+
+### ② `Partial<T>` の挙動を確認する
 
 ```ts
-type Product = { id: number; name: string; price: number; stock: number };
+// 以下のベース型を定義する
+// type User = { id: number; name: string; email: string; role: string }
 
-// 更新したいフィールドだけ渡せる updateProduct 関数を書く
-function updateProduct(id: number, updates: /* TODO */ ): Product {
-  // 実装は省略してOK（型だけ考える）
-  return { id, name: "dummy", price: 0, stock: 0, ...updates };
+// Partial<User> 型の変数に、フィールドを一部だけ持つオブジェクトを代入してみる
+// - name だけ持つ
+// - email と role だけ持つ
+// - 何も持たない（空オブジェクト）
+// → どのパターンも型エラーなしで通るか確認する
+
+// 次に User 型（Partial でないほう）で同じことを試す
+// → 何が起きるか？
+```
+
+**`Partial` の典型的な使いどころ：更新処理の入力型**
+
+```ts
+// 更新 API はすべてのフィールドを送る必要はない
+// → 変えたいフィールドだけ送れるように Partial を使う
+function updateUser(id: number, updates: Partial<User>) {
+  // updates.name だけ届くこともあるし、複数届くこともある
 }
-
-updateProduct(1, { price: 500 });          // priceだけ更新
-updateProduct(2, { name: "新商品", stock: 10 }); // 2つ更新
 ```
 
 ---
 
-## 3. `Required<T>`
-
-型 `T` の全プロパティを**必須**にする（`Partial` の逆）。
+### ③ `Required<T>` で `Partial` を元に戻す
 
 ```ts
-type Config = { host?: string; port?: number };
-type StrictConfig = Required<Config>;
-// → { host: string; port: number }  ← ? が消える
-```
+// 全フィールドがオプションの型を定義する
+// type DraftPost = { title?: string; body?: string; publishedAt?: Date }
 
-### 練習3
+// Required<DraftPost> 型の変数を作り、フィールドを1つ省略してみる
+// → TypeScript はエラーを出すか？
 
-次の型を `Required` で変換して、全フィールドが必須になることを確認してください。
-
-```ts
-type DraftPost = {
-  title?: string;
-  body?: string;
-  publishedAt?: Date;
-};
-
-// DraftPost を全フィールド必須にした PublishedPost 型を作る
-type PublishedPost = /* TODO */;
-
-// これが型エラーにならなければOK
-const post: PublishedPost = {
-  title: "TypeScript 入門",
-  body: "本文...",
-  publishedAt: new Date(),
-};
+// ポイント：Required は Partial と逆の変換。
+// 「下書き型 → 公開済み型」のような「確定後に全フィールドが揃う」場面で使う
 ```
 
 ---
 
-## 4. `Pick<T, K>`
-
-型 `T` から**指定したプロパティだけ**を取り出す。
+### ④ `Pick` と `Omit` を比較する
 
 ```ts
-type User = { id: number; name: string; email: string; password: string };
-type PublicUser = Pick<User, "id" | "name">;
-// → { id: number; name: string }   ← password と email は消える
+// 以下の型を定義する
+// type Employee = {
+//   id: number
+//   name: string
+//   department: string
+//   salary: number
+//   ssn: string   // 社会保障番号（機密）
+// }
+
+// 外部に公開していい型を2通りの方法で作る：
+// パターンA：Pick で「残したいもの」を列挙する
+//   → id / name / department だけ残す
+// パターンB：Omit で「除きたいもの」を列挙する
+//   → salary と ssn だけ除く
+
+// 両方の結果が同じ形になることを確認する
 ```
 
-**よく使う場面：** 外部に返すデータからパスワードなどを除く
+**Pick と Omit の使い分け**
 
-### 練習4
-
-次の `Employee` 型から、表示用の型を `Pick` で作ってください。
-
-```ts
-type Employee = {
-  id: number;
-  name: string;
-  department: string;
-  salary: number;  // 非公開にしたい
-  ssn: string;     // 非公開にしたい
-};
-
-// id / name / department だけ持つ型を Pick で作る
-type PublicEmployee = /* TODO */;
-```
-
----
-
-## 5. `Omit<T, K>`
-
-型 `T` から**指定したプロパティを除いた**型を作る（`Pick` の逆）。
-
-```ts
-type User = { id: number; name: string; email: string; password: string };
-type SafeUser = Omit<User, "password">;
-// → { id: number; name: string; email: string }
-```
-
-`Pick` と `Omit` の使い分け：
-- 残したいプロパティが少ない → `Pick`
-- 除きたいプロパティが少ない → `Omit`
-
-### 練習5
-
-練習4の `Employee` 型を今度は `Omit` で書き直してください。
-
-```ts
-// Omit を使って salary と ssn を除いた型を作る
-type PublicEmployee2 = /* TODO */;
-```
-
----
-
-## 6. `Record<K, V>`
-
-キーの型 `K`、値の型 `V` の**オブジェクト型**を作る。
-
-```ts
-type Role = "admin" | "editor" | "viewer";
-type Permissions = Record<Role, boolean>;
-// → { admin: boolean; editor: boolean; viewer: boolean }
-
-const permissions: Permissions = {
-  admin: true,
-  editor: true,
-  viewer: false,
-};
-```
-
-**よく使う場面：** マップ・辞書構造を型安全に定義する
-
-### 練習6
-
-次の要件を `Record` で実装してください。
-
-```ts
-type Lang = "ja" | "en" | "zh";
-
-// 各言語のラベルを持つオブジェクトの型を Record で定義する
-const labels: /* TODO */ = {
-  ja: "日本語",
-  en: "English",
-  zh: "中文",
-};
-```
-
----
-
-## 総合練習
-
-次のシナリオをユーティリティ型を使って実装してください。
-
-```ts
-type Article = {
-  id: number;
-  title: string;
-  body: string;
-  author: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-// 1. 新規作成用：id / createdAt / updatedAt は自動生成なので不要
-type CreateArticleInput = /* TODO: Omit を使う */;
-
-// 2. 更新用：title と body だけ変更可能（どちらも省略OK）
-type UpdateArticleInput = /* TODO: Pick + Partial を組み合わせる */;
-
-// 3. 一覧表示用：body は重いので除く
-type ArticleSummary = /* TODO: Omit を使う */;
-```
-
----
-
-## まとめ
-
-| ユーティリティ型 | 効果 |
+| 状況 | 選ぶ型 |
 |---|---|
-| `readonly` | プロパティを読み取り専用にする |
-| `Partial<T>` | 全プロパティを省略可能にする |
-| `Required<T>` | 全プロパティを必須にする |
-| `Pick<T, K>` | 指定プロパティだけ残す |
-| `Omit<T, K>` | 指定プロパティだけ除く |
-| `Record<K, V>` | キー・値の型を指定してオブジェクト型を作る |
+| 残したいプロパティの数が少ない | `Pick` |
+| 除きたいプロパティの数が少ない | `Omit` |
+| 将来プロパティが増えたとき自動で含めたい | `Omit`（除外リストだけ管理すればいい） |
 
 ---
 
-## 次のステップ
+### ⑤ `Record<K, V>` でマップ構造を作る
 
-`tsconfig.json` の基本設定（`strict` / `target` / `module`） → `typescript-study12-tsconfig.md`
+```ts
+// 以下の Union 型を定義する
+// type Lang = "ja" | "en" | "zh"
+
+// Record<Lang, string> 型の変数に各言語のラベルを代入する
+// → ja / en / zh の3キーすべてが揃わないとエラーになることを確認する
+
+// 次に、Lang に "ko" を追加してみる
+// → Record を使った変数でどんなエラーが出るか？
+
+// ポイント：Record のキーに Union 型を使うと、
+// 「全パターンを書き漏らすとエラー」という網羅チェックになる
+```
+
+**`Record` vs インデックスシグネチャの違い**
+
+```ts
+// インデックスシグネチャ：キーの型だけ縛る（どんな文字列でもOK）
+type A = { [key: string]: string };
+
+// Record：キーに使える値を Union 型で限定できる
+type B = Record<"ja" | "en", string>;
+// → "ja" と "en" 以外のキーはエラーになる
+```
+
+---
+
+### ⑥ ユーティリティ型を組み合わせる
+
+```ts
+// 以下のベース型を使う
+// type Article = {
+//   id: number
+//   title: string
+//   body: string
+//   author: string
+//   createdAt: Date
+//   updatedAt: Date
+// }
+
+// 次の3つの型をユーティリティ型で作る：
+//
+// 1. CreateArticleInput
+//    → id / createdAt / updatedAt はサーバー側が自動付与するので除く
+//    （Omit を使う）
+//
+// 2. UpdateArticleInput
+//    → title と body だけ変更可能で、どちらも省略OK
+//    （Pick と Partial を組み合わせる）
+//
+// 3. ArticleSummary
+//    → 一覧表示用なので body（本文）は除く
+//    （Omit を使う）
+```
+
+**組み合わせのパターン**
+
+```ts
+// Pick してから Partial にする例：
+type UpdateArticleInput = Partial<Pick<Article, "title" | "body">>;
+
+// 内側から読む：
+// Pick<Article, "title" | "body"> → title と body だけ持つ型
+// Partial<...>                    → それをオプションにする
+```
+
+---
+
+## 確認ポイント
+
+**`Partial` と `Required` はどんな場面で使い分ける？**
+
+`Partial` は「全部そろっていなくてもいい」入力（更新リクエストなど）に使う。`Required` は「全部そろっていないといけない」確定後のデータに使う。下書き→公開のような「状態の変化」を型で表すときに両方がセットで役立つ
+
+**`Pick` と `Omit` のどちらを選ぶかの判断基準は？**
+
+残したいプロパティが少ない → `Pick`、除きたいプロパティが少ない → `Omit`。また、ベース型にプロパティが増えたとき「新しいものを自動で含めたい」なら `Omit`（除外リストだけ管理すればいい）
+
+**`Record<K, V>` と `{ [key: string]: V }` の違いは？**
+
+インデックスシグネチャはキーに任意の文字列が来る。`Record` は Union 型をキーにすることで「この値だけ・全部書け」と強制できる。⑤で確認したように、`Record<"ja" | "en" | "zh", string>` は3キーすべて書かないとエラーになる
+
+**ユーティリティ型は自分でも作れる？**
+
+作れる。`Partial<T>` の中身を覗くと `{ [P in keyof T]?: T[P] }` と書いてある。これは Mapped Types（マップ型）と呼ばれる TypeScript の機能で、フェーズ3以降で出てくる
