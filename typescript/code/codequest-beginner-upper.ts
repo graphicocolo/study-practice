@@ -219,3 +219,245 @@ console.log(descendingOrderedNumbers(notFormattedNumbers));
 // let numbers = [5, 2, 8, 1, 3];
 // let sorted = [...numbers].sort((a, b) => a - b);
 // console.log(sorted);
+
+// 20. クラスの利用
+// 「Person クラスを作成し、name プロパティと greet メソッドを追加してください。」
+
+// 自分のコード 1回目
+class Person {
+  // JavaScript はこれで動くが
+  // TypeScript はプロパティを先に宣言しないとエラー
+  // ← ここに name の宣言が必要
+  // constructor(name: string) {
+  //   this.name = name;
+  // }
+  // ↓こう書くか
+  // name: string;
+  // constructor(name: string) {
+  //   this.name = name;
+  // }
+  // ↓もしくはこう書くか
+  // constructor(public name: string) {
+  // } // {}は空で良い
+  constructor(public name: string, public message: string) {}
+  // ゲッター
+  // get greet() {
+  //   return `${this.name}さん、${this.message}`;
+  // }
+  // メソッド
+  greet() {
+    console.log(`${this.name}さん、${this.message}`);
+  }
+}
+const morningGreeting = new Person("山田", "おはようございます");
+;
+morningGreeting.greet();
+
+// 解答例
+// class Person {
+//   constructor(name) {
+//     this.name = name;
+//   }
+//   greet() {
+//     console.log(`Hello, my name is ${this.name}.`);
+//   }
+// }
+// let person = new Person("Taro");
+// person.greet();
+
+// 21：FizzBuzz判定関数
+// 1から100までの数値を順に表示してください。ただし、3の倍数のときは数値の代わりに “Fizz”、5の倍数のときは “Buzz”、3と5の両方の倍数のときは “FizzBuzz” と表示してください。
+
+// 自分のコード 1回目 失敗例 正常に動かない
+// let value: number = 0;
+// function judgeFizzBuzz () {
+//   for (let i = 0; i < 10; i++) {
+//     value = i + 1;
+//     if (value % 3 === 0) console.log("Fizz"); 
+    // if (value % 5 === 0) console.log("Buzz"); 
+    // if (value % 3 === 0 && value % 5 === 0) console.log("FizzBuzz");
+//     console.log(value);
+//   }
+// }
+
+// 自分のコード 2回目
+// 一応きちんと動くがもう少しスマートにしたい
+// 他の書き方が知りたい
+// let count: number = 0;
+// function judgeFizzBuzz () {
+//   for (let i = 0; i < 100; i++) {
+//     count = i + 1;
+//     if (count % 15 === 0) {
+//       console.log("FizzBuzz");
+//     } else if (count % 5 === 0) {
+//       console.log("Buzz");
+//     } else if (count % 3 === 0) {
+//       console.log("Fizz");
+//     } else {
+//       console.log(count);
+//     }
+//   }
+// }
+// judgeFizzBuzz();
+
+// 自分のコード 3回目 アプローチA
+// let count: number = 0;
+// function judgeFizzBuzz () {
+//   for (let i = 0; i < 100; i++) {
+//     count = i + 1;
+//     let result: string | number = "";
+//     if (count % 3 === 0) result += "Fizz";
+//     if (count % 5 === 0) result += "Buzz";
+//     if (result === "") result = count;
+//     console.log(result);
+//   }
+// }
+// judgeFizzBuzz();
+
+// 解答例 アプローチA
+// for (let i = 1; i <= 100; i++) {
+//   let result = "";
+//   if (i % 3 === 0) result += "Fizz";
+//   if (i % 5 === 0) result += "Buzz";
+//   console.log(result || i);
+// }
+
+// 自分のコード 4回目 アプローチB
+// const countNumbers = Array.from({ length: 100 }, (_, i) => i + 1);
+// [...countNumbers].forEach((countNumber) => {
+//   let result: string | number = "";
+//   if (countNumber % 3 === 0) result += "Fizz";
+//   if (countNumber % 5 === 0) result += "Buzz";
+//   if (result === "") result = countNumber;
+//   console.log(result);
+// });
+
+// 解答例 アプローチB
+// const results = Array.from({ length: 100 }, (_, i) => {
+//   const n = i + 1;
+//   let result = "";
+//   if (n % 3 === 0) result += "Fizz";
+//   if (n % 5 === 0) result += "Buzz";
+//   return result || n;
+// });
+// results.forEach((r) => console.log(r));
+
+// 自分のコード 5回目
+// const countDisplayRules: [number, string][] = [
+//   [15, "FizzBuzz"],
+//   [3, "Fizz"],
+//   [5, "Buzz"],
+// ];
+// const countNumbersArray = Array.from({ length: 100 }, (_, i) => i + 1);
+// [...countNumbersArray].forEach((countNumber) => {
+//   let result: string | number = countNumber;
+//   for (const rule of countDisplayRules) {
+//     if (countNumber % rule[0] === 0) {
+//       result = rule[1];
+      // return; // return だと該当する数字が表示されない
+//       break;
+//     }
+//   }
+//   console.log(result);
+// });
+
+// アプローチC：判定ロジックをデータで持つ 解答例
+const countDisplayRules: [number, string][] = [
+  [15, "FizzBuzz"],
+  [3, "Fizz"],
+  [5, "Buzz"],
+];
+Array.from({ length: 100 }, (_, i) => i + 1).forEach((n) => {
+  const matched = countDisplayRules.find(([divisor]) => n % divisor === 0); // [divisor] とすることで、[15, "FizzBuzz"]の1番目の要素だけを分割代入できる
+  // 2番目の要素だけを分割代入する場合
+  // const [, label] = [15, "FizzBuzz"]; // label は "FizzBuzz"
+  console.log(matched ? matched[1] : n);
+});
+
+// 解答例
+// function fizzBuzz(number) {
+//   if (number % 3 === 0 && number % 5 === 0) {
+//     console.log("FizzBuzz");
+//   } else if (number % 3 === 0) {
+//     console.log("Fizz");
+//   } else if (number % 5 === 0) {
+//     console.log("Buzz");
+//   } else {
+//     console.log(number);
+//   }
+// }
+// for (let i = 1; i <= 100; i++) {
+//   fizzBuzz(i);
+// }
+
+// 22. フィボナッチ数列の生成
+// 引数に渡した項数ぶんのフィボナッチ数列を配列で返す関数 generateFibonacci を作成してください。例えば generateFibonacci(10) なら [0, 1, 1, 2, 3, 5, 8, 13, 21, 34] を返します。
+
+// 基礎知識
+// フィボナッチ数列とは、「ある項の数字が、必ず直前の2つの数字の和になる」という単純なルールで作られる数の並び
+// 実例
+// 数字の並びは以下のようになります。1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233...
+// 並び順を見ると、前の2つの数字を足すことで次の数字が生まれていることがわかります。
+// 1 + 1 = 2, 1 + 2 = 3, 2 + 3 = 5, 3 + 5 = 8, 5 + 8 = 13 ...以降も同様
+
+// 自分のコード 1回目
+// 1番目の処理
+// 配列1番目に 0 を代入
+// 2番目の処理
+// 配列2番目に 0 を代入（前の2つの数字を足すことで次の数字が生まれているとして、最初の要素が 0 ならいつまで経っても 0 のままになってしまう...）
+// ↓
+// 3項目以降は「前の2つの和」で計算できますが、最初の2項（0と1）はルールから生まれた数ではなく、決め打ちの出発点となる
+// つまり3項目から、「前2つの数字の和を代入」処理が適用される
+// 1項目と2項目は特別
+// function generateFibonacci (value: number): number[] | string {
+//   if (value < 3) {
+//     return "3以上を入力してください";
+//   }; // エラーを文字列で返すのは TypeScript らしくない書き方
+//   const resultArray = [0, 1];
+//   for (let i = 0; i < value - 2; i++) {
+    // ! を末尾につけることで「この値は null でも undefined でもないと自分が保証する」と TypeScript に伝える
+//     const prev1 = resultArray[resultArray.length - 1]!;
+//     const prev2 = resultArray[resultArray.length - 2]!;
+//     const calcResult = prev1 + prev2;
+//     resultArray.push(calcResult);
+//   }
+//   return resultArray;
+// }
+// console.log(generateFibonacci(5));
+
+// 自分のコード 2回目
+function generateFibonacci (value: number): number[] {
+  const resultArray = [0, 1];
+  if (value < 2) {
+    return resultArray;
+  }; 
+  for (let i = 0; i < value - 2; i++) {
+    const prev1 = resultArray[resultArray.length - 1]!;
+    const prev2 = resultArray[resultArray.length - 2]!;
+    const calcResult = prev1 + prev2;
+    resultArray.push(calcResult);
+  }
+  return resultArray;
+}
+console.log(generateFibonacci(5));
+
+// 解答例
+// function generateFibonacci(n) {
+//   if (n <= 0) return [];
+//   if (n === 1) return [0];
+//   const fib = [0, 1];
+//   for (let i = 2; i < n; i++) {
+//     fib.push(fib[i - 1] + fib[i - 2]);
+//   }
+//   return fib;
+// }
+// console.log(generateFibonacci(10));
+
+// 23. 配列の重複除去
+// 配列 [1, 2, 2, 3, 4, 4, 5] から重複する要素を取り除き、ユニークな値だけの配列を返す関数 removeDuplicates を作成してください。
+
+// 自分のコード 1回目
+function removeDuplicates (numbers: ArrayDatas<number>): ArrayDatas<number> {
+  return [...new Set(numbers)]
+}
+console.log(removeDuplicates(duplicatedNumbers));
