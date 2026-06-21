@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript DOM操作の練習問題10選</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/basecoat.cdn.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/basecoat-css@0.3.11/dist/js/all.min.js" defer></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="m-auto max-w-md p-4">
+  <h1 class="text-2xl font-bold mb-6">JavaScript DOM操作の練習問題10選</h1>
+    <section class="mb-6 pb-4 border-b-1 border-b-gray-200">
+      <h2 class="text-xl font-bold mb-2">テキスト変更</h2>
+      <p id="text1" class="mb-2">こんにちは！</p>
+      <button type="button" id="btn1" class="btn btn-primary font-bold text-base bg-sky-600">テキスト変更</button>
+    </section>
+    <section class="mb-6 pb-4 border-b-1 border-b-gray-200">
+      <h2 class="text-xl font-bold mb-2">非表示にする</h2>
+      <div id="box2" class="p-2 bg-gray-50 mb-2">このボックスを非表示</div>
+      <button type="button" id="btn2" class="btn btn-primary font-bold text-base bg-sky-600">非表示にする</button>
+    </section>
+    <section class="mb-6 pb-4 border-b-1 border-b-gray-200">
+      <h2 class="text-xl font-bold mb-2">表示する</h2>
+      <input type="text" id="input3" placeholder="入力してください" class="input mb-2">
+      <button type="button" id="btn3" class="btn btn-primary font-bold text-base bg-sky-600">表示する</button>
+      <button type="reset" id="reset3" class="btn btn-primary font-bold text-base bg-gray-600">リセット</button>
+      <p id="output3" class="mt-2"></p>
+      <p id="error3" class="text-red-600 text-sm mt-2"></p>
+    </section>
+    <section class="mb-6 pb-4 border-b-1 border-b-gray-200">
+      <h2 class="text-xl font-bold mb-2">追加する</h2>
+      <ul id="list4" class="mb-2">
+        <li>既存の項目</li>
+      </ul>
+      <button type="button" id="btn4" class="btn btn-primary font-bold text-base bg-sky-600">追加する</button>
+      <button type="reset" id="reset4" class="btn btn-primary font-bold text-base bg-gray-600">リセット</button>
+    </section>
+    <section class="mb-6 pb-4 border-b-1 border-b-gray-200">
+      <h2 class="text-xl font-bold mb-2">最後を削除</h2>
+      <ul id="list5" class="mb-2">
+        <li>1つ目</li>
+        <li>2つ目</li>
+        <li>3つ目</li>
+      </ul>
+      <button type="button" id="btn5" class="btn btn-primary font-bold text-base bg-sky-600">最後を削除</button>
+      <button type="reset" id="reset5" class="btn btn-primary font-bold text-base bg-gray-600">リセット</button>
+    </section>
+  </div>
+</body>
+</html>
