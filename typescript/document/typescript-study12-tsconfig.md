@@ -34,6 +34,31 @@ npx tsc --init
 | `include` | コンパイル対象ファイルのパターン | `["src/**/*"]` |
 | `exclude` | コンパイルから除外するパターン | `["node_modules"]` |
 
+**モジュール形式について**
+
+- CommonJS (CJS) Node.js 独自のモジュール形式（require / module.exports）
+- ESM JavaScript 標準のモジュール形式（import / export）、ES2015 で登場
+- ESNext tsconfig の module 設定値。「最新の ESM 構文のまま出力する」という意味 tsconfig のオプション値
+
+ESNext は独立したモジュール形式ではなく、「import / export を変換せずそのまま出力する」という tsconfig の指示です。つまり ESM の一種で、バンドラー（Vite, webpack）が後処理することを前提にしています。
+
+### `target` と `module` は何を制御するか
+
+2つは独立した設定で、それぞれ別のことを制御している。
+
+| 設定 | 制御するもの | 一言で |
+|---|---|---|
+| `target` | 出力する JS の**バージョン（世代）** | どの世代の JS 構文で書き出すか |
+| `module` | 出力する JS の**モジュール形式** | `import` をどの読み込み方式で書き出すか |
+
+```
+TypeScript (.ts)
+  ↓ コンパイル
+JavaScript (.js)
+  ├── target → アロー関数や const をそのまま出すか、var に変換するかなど「構文のバージョン」
+  └── module → import を require() に変換するか、import のまま出すかなど「モジュール形式」
+```
+
 ---
 
 ## やること
