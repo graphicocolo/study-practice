@@ -35,6 +35,16 @@ const list5 = document.querySelector("#list5");
 const list5ActionButton = document.querySelector("button#btn5");
 /** @type {HTMLButtonElement | null} */
 const output5ResetButton = document.querySelector("button#reset5");
+/** @type {HTMLDivElement | null} */
+const toggleBox6 = document.getElementById("toggleBox");
+/** @type {HTMLButtonElement | null} */
+const class6ActionButton = document.querySelector("button#btn6");
+/** @type {HTMLDivElement | null} */
+const modalWrap = document.getElementById("wrapModal");
+/** @type {HTMLButtonElement | null} */
+const modalOpenButton = document.getElementById("openModal");
+/** @type {HTMLButtonElement | null} */
+const modalCloseButton = document.getElementById("closeModal");
 
 // 2. 変数・初期値を定義
 
@@ -52,6 +62,18 @@ function validateNotEmpty(element, fieldName, errorElement) {
     return false;
   }
   return true;
+}
+
+/**
+ *  2 つの値の間のランダムな整数を得る
+ * @param {number} min 最小値
+ * @param {number} max 最大値
+ * @returns {number} ランダムな整数
+ */
+function getRandomIntInclusive(min, max) {
+  const minCeiled = Math.ceil(min);
+  const maxFloored = Math.floor(max);
+  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // 上限を含み、下限も含む
 }
 
 // 4. イベントリスナー
@@ -147,3 +169,120 @@ output5ResetButton.addEventListener("click", () => {
 //     list.removeChild(list.lastElementChild);
 //   }
 // });
+
+class6ActionButton.addEventListener("click", () => {
+  toggleBox6.classList.toggle("bg-orange-200");
+});
+
+// 解答例
+// document.getElementById('btn6').addEventListener('click', () => {
+//   document.getElementById('toggleBox').classList.toggle('active');
+// });
+
+document.getElementById("btn7").addEventListener("click", () => {
+  const param = getRandomIntInclusive(1, 100);
+  // const param = Math.floor(Math.random() * 100);
+  document.getElementById("image7").setAttribute("src", `https://picsum.photos/200?random=${param}`);
+});
+
+// 解答例
+// document.getElementById('btn7').addEventListener('click', () => {
+//   document.getElementById('image7').src = 'https://picsum.photos/200?random=' + Math.floor(Math.random() * 100);
+// });
+
+// ↓これだと対応する要素のみが表示非表示切り替えとなり
+// もう一つの要素は表示されっぱなしか非表示のまま
+// tabButtons.forEach((tabButton) => {
+//   tabButton.addEventListener("click", () => {
+//     const value = tabButton.dataset.tab;
+//     document.getElementById(value).classList.toggle("hidden");
+//   });
+// });
+
+// 片方のボタンをクリックしたら対応要素の表示非表示が切り替わり
+// さらにもう一つの要素も、対応要素とは表示非表示が逆に切り替わる必要がある
+// しかしこれだとボタンと内容が増えた時にifが増えることになり煩雑
+// const tabButtons = document.querySelectorAll("[data-tab]");
+// tabButtons.forEach((tabButton) => {
+//   tabButton.addEventListener("click", () => {
+//     if (tabButton.dataset.tab === "tab1") {
+//       document.getElementById("tab1").classList.remove("hidden");
+//       document.getElementById("tab2").classList.add("hidden");
+//     } else {
+//       document.getElementById("tab2").classList.remove("hidden");
+//       document.getElementById("tab1").classList.add("hidden");
+//     }
+//   });
+// });
+const tabButtons = document.querySelectorAll(".tab");
+const tabContents = document.querySelectorAll(".tab-content");
+tabButtons.forEach((tabButton) => {
+  tabButton.addEventListener("click", () => {
+    const target = tabButton.dataset.tab;
+    tabContents.forEach((tabContent) => tabContent.classList.add("hidden"));
+    document.getElementById(target).classList.remove("hidden");
+  });
+});
+
+// 解答例
+// const tabs = document.querySelectorAll('.tab');
+// const contents = document.querySelectorAll('.tab-content');
+// tabs.forEach(tab => {
+//   tab.addEventListener('click', () => {
+//     const target = tab.dataset.tab;
+//     contents.forEach(content => content.classList.add('hidden'));
+//     document.getElementById(target).classList.remove('hidden');
+//   });
+// });
+
+modalOpenButton.addEventListener("click", () => {
+  modalWrap.classList.remove("hidden");
+});
+
+modalCloseButton.addEventListener("click", () => {
+  modalWrap.classList.add("hidden");
+});
+
+// ↓自分の解答
+// これだとモーダルのコンテンツをクリックしてもモーダルが閉じてしまう
+// modalWrap.addEventListener("click", () => {
+//   modalWrap.classList.add("hidden");
+// });
+// 解答例
+modalWrap.addEventListener("click", (e) => {
+  if (e.target === modalWrap) {
+    modalWrap.classList.add("hidden");
+  }
+});
+
+// ↓自分の解答
+// モーダルのコンテンツをクリックした場合は何もしない
+// これはうまくいかなかった
+// document.querySelectorAll(".modal-content").forEach((content) => {
+//   content.addEventListener("click", () => {
+//     return;
+//   });
+// });
+
+// querySelectorAll は、該当する NodeList を返す
+// btn に対応するコンテンツを特定する方法が必要
+// data-target 属性や nextElementSibling など
+// document.querySelectorAll(".accordion-btn").forEach((item) => {
+//   item.addEventListener("click", () => {
+//     document.querySelectorAll(".accordion-content").forEach((content) => {
+//       content.classList.toggle("hidden");
+//     });
+//   });
+// });
+
+// querySelector は、文書内の最初の要素を返す
+document.querySelector(".accordion-btn").addEventListener("click", () => {
+  document.querySelector(".accordion-content").classList.toggle("hidden");
+});
+
+document.querySelectorAll(".faq-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    const target = button.dataset.faq;
+    document.getElementById(target).classList.toggle("hidden");
+  });
+});
