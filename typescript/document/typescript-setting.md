@@ -193,3 +193,133 @@ module: "NodeNext" を指定すると…
 ```
 
 Vite を使う React 開発では `target: "ESNext"` + `module: "ESNext"` がセットで設定されるが、これは「Vite がすべて処理してくれるから、TypeScript は変換しなくていい」という意味。
+
+---
+
+### `verbatimModuleSyntax`
+
+「import/export をソースコードのまま（verbatim = 逐語的に）出力する」モード。
+
+有効にすると、**型としてしか使わない import には必ず `import type` を書くことが強制される。**
+
+```ts
+import { User } from "./types";      // ← User が型だけなのでエラー
+import type { User } from "./types"; // ← これが必須になる
+```
+
+なぜ強制されるか：バンドラーやランタイムが「この import は型だけなので消していい」と判断するには、明示的な `import type` が必要なため。
+
+---
+
+### `allowImportingTsExtensions`
+
+import パスに `.ts` 拡張子を書くことを許可する設定。
+
+```ts
+// 通常（拡張子なし、または .js で書くのが慣習）
+import { User } from "./types";
+
+// このオプションがないと拡張子 .ts は書けない
+import { User } from "./types.ts"; // ← allowImportingTsExtensions が必要
+```
+
+ただし、TypeScript が `.ts` → `.js` に変換する際に拡張子を書き換えられないため、**「JS ファイルは出力しない」という別のオプションと必ずセットで使う必要がある。**
+
+---
+
+### `noEmit`
+
+TypeScript に **JS ファイルを一切出力させない** 設定。型チェックだけを行う。
+
+```
+noEmit: true の場合
+  .ts ファイル → 型チェックのみ → .js は出力しない
+```
+
+Vite・esbuild・Babel など別のツールが JS 変換を担当するとき、TypeScript は「型チェック専用」にするために使う。`allowImportingTsExtensions` との組み合わせが許可される理由は「どうせ JS に変換しないので、拡張子の書き換え問題が起きない」から。
+
+---
+
+### `emitDeclarationOnly`
+
+**`.d.ts`（型定義ファイル）だけを出力する** 設定。`.js` は出力しない。
+
+```
+emitDeclarationOnly: true の場合
+  .ts ファイル → 型チェック → .d.ts のみ出力（.js は出力しない）
+```
+
+ライブラリを作るときに、JS 変換は別ツールに任せ、型定義だけ TypeScript に生成させる用途で使う。`noEmit` との違いは「`.d.ts` は欲しい」かどうか。
+
+| オプション | .js 出力 | .d.ts 出力 |
+|---|---|---|
+| `noEmit: true` | なし | なし |
+| `emitDeclarationOnly: true` | なし | あり |
+
+---
+
+### `rewriteRelativeImportExtensions`
+
+TypeScript 5.7 で追加されたオプション。import パスの `.ts` 拡張子を、出力時に自動で `.js` に書き換える。
+
+```ts
+// ソースコード（書いたまま）
+import { User } from "./types.ts";
+
+// 出力された .js ファイル（TypeScript が自動で書き換える）
+import { User } from "./types.js";
+```
+
+`noEmit` なしで `.ts` 拡張子を書きたいときに使う。
+
+---
+
+### `allowImportingTsExtensions` が必要な理由の構造
+
+```
+allowImportingTsExtensions: true
+  ↓「.ts 拡張子で書いていいよ」
+
+でも TypeScript は .ts → .js の変換時に拡張子を書き換えられない
+
+解決策（どれか1つが必要）
+  ├─ noEmit: true                        → そもそも .js を出力しない
+  ├─ emitDeclarationOnly: true           → .d.ts だけ出力、.js は出さない
+  └─ rewriteRelativeImportExtensions: true → 拡張子を .js に自動変換する
+```
+
+**実用上のシンプルな答え：** Deno など一部の環境を除き、import パスに `.ts` 拡張子は通常書かない。TypeScript は拡張子なしのパスを自動で解決する。
+
+---
+
+### `module: "NodeNext"` では import に `.js` 拡張子が必要
+
+`module: "NodeNext"` は Node.js の ESM ルールに厳密に従う。Node.js ESM では import パスに**必ず拡張子が必要**で、かつ「出力後のファイル名」を書く規則がある。
+
+TypeScript は `.ts` → `.js` にコンパイルするので、**ソースが `.ts` でも import には `.js` と書く。**
+
+```ts
+// NG（拡張子なし）
+import { User } from "./types";
+
+// OK（.js と書く ← ソースは .ts だが出力は .js になるから）
+import { User } from "./types.js";
+```
+
+TypeScript は `.js` と書かれた import を「対応する `.ts` ファイルを探せ」と解釈するので、`.ts` ファイルが正しく解決される。
+
+**なぜこうなっているか：**
+
+```
+module: "NodeNext" の設計思想
+  → TypeScript が出力した .js を Node.js がそのまま実行できる状態にする
+  → Node.js ESM は拡張子省略を許可しない
+  → だから import も「実行時と同じパス」= .js で書く
+```
+
+**moduleResolution ごとの拡張子ルールまとめ：**
+
+| moduleResolution | 拡張子 | 典型的な用途 |
+|---|---|---|
+| `node` / `bundler` | 省略可（`.js` 不要） | Vite・webpack などバンドラー経由 |
+| `node16` / `nodenext` | `.js` 必須 | Node.js で直接実行する ESM |
