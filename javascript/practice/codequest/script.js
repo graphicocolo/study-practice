@@ -4,6 +4,13 @@
 // 3. 関数を定義
 // 4. イベントリスナー
 
+// 番外編：追従CTA（スクロール後、一定の領域が表示されたら表示、フッターが表示されたら非表示）
+// 実装したい内容
+// - ページロード時、id="wrapCta" は非表示
+// - 100px程度スクロールした時点（コンテンツとビューの差が100px程度になったら）で id="wrapCta" を表示
+// - 一番最後の要素が画面に入って10pxほどスクロールされたら id="wrapCta" は非表示
+// 表示非表示の切り替えの際の動きは、パッと切り替わるのではなくふわっと切り替わるようにする
+
 // 1. HTML要素を取得
 /** @type {HTMLParagraphElement | null} */ 
 const text1 = document.querySelector("#text1");
@@ -45,8 +52,25 @@ const modalWrap = document.getElementById("wrapModal");
 const modalOpenButton = document.getElementById("openModal");
 /** @type {HTMLButtonElement | null} */
 const modalCloseButton = document.getElementById("closeModal");
+/** @type {HTMLElement | null} */
+const firstHideFlagElements = document.querySelectorAll("section:nth-of-type(-n + 3)");
+const displayFlagElement = document.querySelector("div.flagDisplay");
+/** @type {HTMLElement | null} */
+const hideFlagElements = document.querySelector("section:nth-last-of-type(2) .sentinel");
+/** @type {HTMLDivElement | null} */
+const ctaWrap = document.getElementById("wrapCta");
 
 // 2. 変数・初期値を定義
+const options = {
+  root: null,
+  rootMargin: "-50% 0px",
+  threshold: 0,
+}
+const state = {
+  inFirstZone: false,   // firstHideFlagElements と交差中か
+  inDisplayZone: false, // displayFlagElements と交差中か
+  pastSentinel: false,  // センチネルを通過済みか
+}
 
 // 3. 関数を定義
 /**
@@ -74,6 +98,37 @@ function getRandomIntInclusive(min, max) {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
   return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // 上限を含み、下限も含む
+}
+
+/**
+ *  指定クラス付与
+ * @param {HTMLElement} element 付与対象要素
+ * @param {string} className 付与クラス名
+ */
+function addClass(element, className) {
+  element.classList.add(className);
+}
+
+/**
+ *  指定クラス削除
+ * @param {HTMLElement} element 削除対象要素
+ * @param {string} className 削除クラス名
+ */
+function removeClass(element, className) {
+  element.classList.remove(className);
+}
+
+/**
+ *  IntersectionObserver 交差状態管理
+ */
+function updateCta() {
+  if (state.pastSentinel) {
+    removeClass(ctaWrap, "-visible");
+  } else if (state.inDisplayZone) {
+    addClass(ctaWrap, "-visible");
+  } else {
+    removeClass(ctaWrap, "-visible");
+  }
 }
 
 // 4. イベントリスナー
@@ -286,3 +341,42 @@ document.querySelectorAll(".faq-button").forEach((button) => {
     document.getElementById(target).classList.toggle("hidden");
   });
 });
+
+// setUpIntersectionObserver(firstHideFlagElements, options, removeClass, "-visible");
+
+// setUpIntersectionObserver(displayFlagElements, options, addClass, "-visible");
+
+// setUpIntersectionObserver(hideFlagElements, { root: null, rootMargin: "0px", threshold: 0 }, removeClass, "-visible");
+
+// ページ冒頭の CTA 非表示（監視対象が複数）
+// const intersectingHideElements = new Set();
+// const firstHideZoneObserver = new IntersectionObserver((entries) => {
+//   entries.forEach((entry) => {
+//     if (entry.isIntersecting) {
+//       intersectingHideElements.add(entry.target);
+//     } else {
+//       intersectingHideElements.delete(entry.target);
+//     }
+//   });
+//   state.inFirstZone = intersectingHideElements.size > 0; // 1つでも交差していればtrue
+//   updateCta();
+// }, options);
+// firstHideFlagElements.forEach((el) => firstHideZoneObserver.observe(el));
+
+// CTA 表示（監視対象が1つ）
+const displayZoneObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    state.inDisplayZone = entry.isIntersecting;
+    updateCta();
+  });
+}, options);
+displayZoneObserver.observe(displayFlagElement);
+
+// ページ末尾の CTA 非表示（監視対象が1つ）
+const sentinelObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    state.pastSentinel = entry.isIntersecting;
+    updateCta();
+  });
+}, { root: null, rootMargin: "0px", threshold: 0 });
+sentinelObserver.observe(hideFlagElements);
