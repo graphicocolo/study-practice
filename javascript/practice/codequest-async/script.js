@@ -6,12 +6,14 @@
 
 // 1. HTML要素を取得
 /** @type {HTMLButtonElement | null} */
-const getApiWithPromiseButton = document.querySelector("#btn1");
+const getApiWithPromiseButton = document.getElementById("btn1");
+/** @type {HTMLButtonElement | null} */
+const getApiWithAsyncButton = document.getElementById("btn2");
 
 // 2. 変数・初期値を定義
 
 // 3. 関数を定義
-// 自分の解答
+// fetchでAPIからデータ取得（Promise） 自分の解答
 // const fetchTodos = fetch("https://jsonplaceholder.typicode.com/todos?userId=1&id=1")
 const fetchTodos = fetch("https://jsonplaceholder.typicode.com/todos/1")
   .then(response => {
@@ -28,7 +30,7 @@ const fetchTodos = fetch("https://jsonplaceholder.typicode.com/todos/1")
   })
 
 // 4. イベントリスナー
-// 自分の解答
+// fetchでAPIからデータ取得（Promise） 自分の解答
 // この書き方だと、fetchTodos の定義箇所で fetch したデータを使い回す
 getApiWithPromiseButton.addEventListener("click", () => {
   // alert(fetchTodos);
@@ -39,7 +41,7 @@ getApiWithPromiseButton.addEventListener("click", () => {
   fetchTodos.then(title => alert(title));
   // 戻ってきたデータの中身に触れらるのはコールバック関数の内側だけ
 })
-// 解答
+// fetchでAPIからデータ取得（Promise） 解答
 // この書き方だと、ボタンをクリックするたびにfetchでデータを呼び出している
 // getApiWithPromiseButton.addEventListener("click", () =>{
 //   fetch('https://jsonplaceholder.typicode.com/todos/1')
@@ -50,4 +52,29 @@ getApiWithPromiseButton.addEventListener("click", () => {
 //     .catch(error => {
 //       alert('エラーが発生しました');
 //     });
+// });
+
+// async/awaitでAPI取得 自分の解答
+getApiWithAsyncButton.addEventListener("click", async () => {
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/todos/1");
+    if (!response.ok) {
+      throw new Error("エラー：レスポンスが返ってきませんでした");
+    }
+    const data = await response.json();
+    alert(data.title);
+  } catch (error) {
+    alert(error);
+  }
+});
+
+// async/awaitでAPI取得 解答
+// document.getElementById('btn2').addEventListener('click', async () => {
+//   try {
+//     const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+//     const data = await response.json();
+//     alert('タイトル: ' + data.title);
+//   } catch (error) {
+//     alert('エラーが発生しました');
+//   }
 // });
