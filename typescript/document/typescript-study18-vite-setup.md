@@ -29,6 +29,10 @@ study18-vite-app/
 
 ### ① Vite プロジェクトを作成する
 
+- [npm | Home](https://www.npmjs.com)
+- [Vite] ()
+- [create-vite] (https://www.npmjs.com/package/create-vite)
+
 ```bash
 # study-practice/typescript/practice/ に移動してから実行
 # npm create vite@latest study18-vite-app -- --template vanilla-ts
@@ -60,6 +64,11 @@ study18-vite-app/
   → `src="/src/main.ts"` のように **`.ts` ファイルが直接指定されている**ことに注目する
   → 通常のブラウザは `.ts` を読めないはずなのに、なぜ動くのか？（Vite が開発時に裏側で変換している）
 
+**自分メモ**
+
+- `index.html` で、モジュールとして `src="/src/main.ts"` が指定されている
+- `index.html` の `<div id="app"></div>` の中で `src="/src/main.ts"` に書かれている内容が展開される（`document.querySelector<HTMLDivElement>('#app')!.innerHTML = ...`）
+
 ### ③ `tsconfig.json` の中身を読む
 
 ```bash
@@ -67,11 +76,19 @@ study18-vite-app/
 ```
 
 - study12（`tsconfig.json` の基本設定）で学んだ `strict` / `target` / `module` を探す
+  - `strict` は記載自体無し
+  - `target` は `es2023`
+  - `module` は `esnext`
 - 見慣れない項目があれば、コメントで役割をメモしておく（例：`isolatedModules`, `moduleDetection` など）
 - study17 で確認した `isolatedModules` の設定値が何になっているか確認する
   → Vite プロジェクトでこの値がどちらに設定されていることが多いか、その理由も考える
+  - `isolatedModules` の記載自体無し
 
-### ④ `vite.config.ts` の中身を読む
+### ④ `vite.config.ts` の中身を読む（今回は省略）
+
+今回はインストール直後から `vite.config.ts` は存在しなかった
+
+`vanilla-ts` テンプレートはプラグインや特別なビルド設定を必要としないため、Vite側が「デフォルト設定のまま動く場合はファイルを生成しない」という判断をしている可能性があります。逆に、React用テンプレート（@vitejs/plugin-react が必要）などは今でも `vite.config.ts` が生成されるはず
 
 ```bash
 # study18-vite-app/vite.config.ts を開く
@@ -87,7 +104,7 @@ study18-vite-app/
 // const count: number = "文字列"; // 型エラーになるはず
 
 // npm run dev の状態のまま保存する
-// → ターミナル・ブラウザにどうエラーが表示されるか確認する
+// → ターミナル・ブラウザにどうエラーが表示されるか確認する → エラーは表示されない
 // → tsc を手動実行したときのエラーメッセージと比べて何が違うか
 ```
 
@@ -110,6 +127,10 @@ npx tsc --noEmit
 ```
 
 - `src/main.ts` は `dist/` の中でどんなファイル名・中身になっているか確認する
+  - assets
+  - favicon.svg
+  - icons.svg
+  - index.html
 - ファイルサイズや内容が開発時の `main.ts` とどう違うか（圧縮・バンドルされていることを確認する）
 
 ---

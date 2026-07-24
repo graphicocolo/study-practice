@@ -71,6 +71,67 @@
 
 ---
 
+## 実例：Viteが生成したtsconfig.jsonを分類する（study18）
+
+`npm create vite@latest -- --template vanilla-ts` で生成された `tsconfig.json` を例に、各設定が「何のために存在するか」を4つのグループに分類する。TypeScriptにまだ精通していない段階では、「この設定は変更が必要か」の感覚をつかむのにこの分類が役立つ。
+
+```json
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "lib": ["ES2023", "DOM"],
+    "types": ["vite/client"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}
+```
+
+**① Viteが動くために必要な設定（フレームワークに関係なく共通）**
+
+- `moduleResolution: "bundler"` / `module: "esnext"` — Node方式ではなく、バンドラー方式でimportを解決させる
+- `types: ["vite/client"]` — `import.meta.env` や `.svg`/`.css` のimportをTypeScriptに教える、Vite専用の型定義
+- `noEmit: true` — 実際のJS変換・バンドルはVite（esbuild/rolldown）側がやるので、TypeScriptは型チェックだけに専念させる
+- `allowImportingTsExtensions: true` / `moduleDetection: "force"` — bundlerモード特有の付随設定
+
+→ これらはVanillaでもReactでもVueでも、**Viteを使う限り基本セット**（パターンCの中身そのもの）。
+
+**② ブラウザで動かすために必要な設定（フレームワーク関係なく「ブラウザ向け」なら共通）**
+
+- `lib: ["ES2023", "DOM"]` — `document` や `window` のようなブラウザAPIの型を認識させる
+
+**③ フレームワーク固有で変わる部分**
+
+Reactの場合（`--template react-ts`）は、ここに以下が**追加**される。
+
+- `"jsx": "react-jsx"` — `.tsx` の中でJSX構文（`<div>...</div>`）を書けるようにする設定。Vanilla-tsにはJSXがないので不要
+- `lib` に `"DOM.Iterable"` が足されることが多い（`document.querySelectorAll` の戻り値をfor-ofで回せるようにする等）
+
+**④ プロジェクトの好み・規約で変えてよい設定（Vite/フレームワークとは無関係）**
+
+- `target`（どのJSバージョンに出力するか。対応ブラウザ次第）
+- `noUnusedLocals` / `noUnusedParameters` / `noFallthroughCasesInSwitch`（厳しさの好み）
+- `skipLibCheck` / `verbatimModuleSyntax`
+
+**まとめ**
+
+テンプレートが生成した①②③は、そのプロジェクト種別に対する必須〜準必須の設定。④は好みで後から調整してよい部分。他のテンプレートの `tsconfig.json` を見たときも「これはVite用か、フレームワーク用か、好みか」で仕分けすると理解しやすい。
+
+---
+
 ## まとめ：どれを選ぶか
 
 ```
