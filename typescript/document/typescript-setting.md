@@ -384,3 +384,10 @@ module: "NodeNext" の設計思想
 |---|---|---|
 | `node` / `bundler` | 省略可（`.js` 不要） | Vite・webpack などバンドラー経由 |
 | `node16` / `nodenext` | `.js` 必須 | Node.js で直接実行する ESM |
+
+---
+
+## 参照
+
+- [tsconfig.jsonを設定する](https://typescriptbook.jp/reference/tsconfig/tsconfig.json-settings)
+- [なんとなく使うtsconfig.jsonをやめる](https://zenn.dev/uniformnext/articles/e2106ba4d995b1)
