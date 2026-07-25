@@ -19,6 +19,26 @@ const getSimultaneousApiData = document.getElementById("btn5");
 const getDelayApiData = document.getElementById("btn6");
 /** @type {HTMLParagraphElement | null} */ 
 const displayText6 = document.getElementById("msg6");
+/** @type {HTMLButtonElement | null} */
+const getApiDataAfterLoading = document.getElementById("btn7");
+/** @type {HTMLParagraphElement | null} */ 
+const displayTitle7 = document.getElementById("result7");
+/** @type {HTMLButtonElement | null} */
+const getApiDataWithDisable = document.getElementById("btn8");
+/** @type {HTMLParagraphElement | null} */ 
+const displayStatus8 = document.getElementById("status8");
+/** @type {HTMLButtonElement | null} */
+const postApi = document.getElementById("btn9");
+/** @type {HTMLInputElement | null} */
+const inputName9 = document.getElementById("input9");
+/** @type {HTMLParagraphElement | null} */ 
+const displayStatus9 = document.getElementById("status9");
+/** @type {HTMLButtonElement | null} */
+const getUserId10 = document.getElementById("btn10");
+/** @type {HTMLInputElement | null} */
+const inputId10 = document.getElementById("input10");
+/** @type {HTMLParagraphElement | null} */ 
+const displayUserInfo10 = document.getElementById("userInfo10");
 
 // 2. 変数・初期値を定義
 
@@ -197,4 +217,155 @@ getDelayApiData.addEventListener("click", async () =>{
 //   setTimeout(() => {
 //     document.getElementById('msg6').textContent = 'こんにちは！';
 //   }, 3000);
+// });
+
+// ローディング表示 → API取得後に表示 自分の解答
+getApiDataAfterLoading.addEventListener("click", async () => {
+  displayTitle7.textContent = "読み込み中...";
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/todos/1");
+    if (!response.ok) {
+      throw new Error("レスポンスがありませんでした");
+    }
+    const data = await response.json();
+    displayTitle7.textContent = data.title;
+  } catch (error) {
+    console.error(error.message);
+  }
+});
+
+// ローディング表示 → API取得後に表示 解答
+// document.getElementById('btn7').addEventListener('click', async () => {
+//   const result = document.getElementById('result7');
+//   result.textContent = '読み込み中...';
+//   try {
+//     const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+//     const data = await res.json();
+//     result.textContent = '取得したタイトル：' + data.title;
+//   } catch (e) {
+//     result.textContent = 'エラーが発生しました';
+//   }
+// });
+
+// ボタン連打を防ぐ（多重実行対策） 自分の解答
+getApiDataWithDisable.addEventListener("click", async () => {
+  getApiDataWithDisable.setAttribute("disabled", "");
+  getApiDataWithDisable.textContent = "通信中...";
+  displayStatus8.textContent = "通信中...";
+  try {
+    const response = await fetch("https://jsonplaceholder.typicode.com/todos/1");
+    if (!response.ok) {
+      throw new Error("レスポンスがありませんでした");
+    }
+    const data = await response.json();
+    getApiDataWithDisable.removeAttribute("disabled");
+    getApiDataWithDisable.textContent = "送信する";
+    displayStatus8.textContent = `データ取得：${data.title}`;
+  } catch (error) {
+    console.error(error.message);
+  }
+});
+
+// ボタン連打を防ぐ（多重実行対策） 解答
+// const btn8 = document.getElementById('btn8');
+// const status8 = document.getElementById('status8');
+// btn8.addEventListener('click', async () => {
+//   btn8.disabled = true;
+//   status8.textContent = '送信中...';
+//   await new Promise(resolve => setTimeout(resolve, 2000)); // 疑似送信処理
+//   status8.textContent = '送信完了！';
+//   btn8.disabled = false;
+// });
+
+// データをPOST送信して結果を表示 自分の解答
+postApi.addEventListener("click", async () => {
+  if (inputName9.value === "") {
+    displayStatus9.textContent = "名前を入力してください";
+    return;
+  };
+  postApi.disabled = true;
+  postApi.textContent = "送信中...";
+  displayStatus9.textContent = "送信中...";
+  const nameData = JSON.stringify({ name: inputName9.value });
+  try {
+    const headers = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: nameData
+    }
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts", headers);
+    if (!response.ok) {
+      throw new Error("レスポンスがありませんでした");
+    }
+    displayStatus9.textContent = `送信完了 ようこそ${inputName9.value}さん`;
+    inputName9.value = "";
+  } catch (error) {
+    console.error(error.message);
+  } finally {
+    postApi.textContent = "送信する";
+    postApi.disabled = false;
+  }
+});
+
+// データをPOST送信して結果を表示 解答
+// document.getElementById('btn9').addEventListener('click', async () => {
+//   const name = document.getElementById('nameInput9').value;
+//   const status = document.getElementById('status9');
+//   status.textContent = '送信中...';
+//   try {
+//     await fetch('https://jsonplaceholder.typicode.com/posts', {
+//       method: 'POST',
+//       body: JSON.stringify({ name }),
+//       headers: { 'Content-Type': 'application/json' }
+//     });
+//     status.textContent = `送信完了！こんにちは、${name}さん！`;
+//   } catch (e) {
+//     status.textContent = '送信に失敗しました';
+//   }
+// });
+
+// ユーザーID入力でAPIから情報を取得 自分の解答
+getUserId10.addEventListener("click", async () => {
+  if (inputId10.value === "") {
+    displayUserInfo10.textContent = "IDを入力してください";
+    return;
+  };
+  getUserId10.disabled = true;
+  getUserId10.textContent = "読み込み中...";
+  displayUserInfo10.textContent = "読み込み中...";
+  try {
+    const response = await fetch(`https://jsonplaceholder.typicode.com/users/${inputId10.value}`);
+    if (!response.ok) {
+      throw new Error("レスポンスがありませんでした");
+    }
+    const data = await response.json();
+    displayUserInfo10.textContent = `ようこそ、${data.name}さん`;
+  } catch (error) {
+    console.error(error.message);
+  } finally {
+    inputId10.value = "";
+    getUserId10.textContent = "ユーザー取得";
+    getUserId10.disabled = false;
+  }
+});
+
+// ユーザーID入力でAPIから情報を取得 解答
+// document.getElementById('btn10').addEventListener('click', async () => {
+//   const id = document.getElementById('userIdInput10').value;
+//   const userInfo = document.getElementById('userInfo10');
+//   if (!id) {
+//     userInfo.textContent = 'IDを入力してください';
+//     return;
+//   }
+//   userInfo.textContent = '取得中...';
+//   try {
+//     const res = await fetch(`https://jsonplaceholder.typicode.com/users/${id}`);
+//     if (!res.ok) throw new Error('取得失敗');
+//     const user = await res.json();
+//     userInfo.textContent = `名前：${user.name}`;
+//   } catch (e) {
+//     userInfo.textContent = '取得できませんでした';
+//   }
 // });
