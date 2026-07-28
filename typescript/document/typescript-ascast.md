@@ -143,6 +143,8 @@ e.target.value as 'TaxCalculator' | 'BmiCalculator'
 
 「自分が型より正確な情報を持っている」ときは有効：
 
+危険なasとの違いを一言でまとめると、「実行時に本当にその形になると保証できる根拠がコード側にあるかどうか」
+
 ```tsx
 // ✅ OK：このIDは必ず存在してかつ input タグだと確信できる場合
 const input = document.getElementById('price') as HTMLInputElement
