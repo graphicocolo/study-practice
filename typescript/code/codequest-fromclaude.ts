@@ -21,4 +21,3 @@
 const calculator = { add: (var1: number, var2: number):number => var1 + var2 }
 
 console.log(calculator.add(2, 5)); // → 7
-
