@@ -140,6 +140,6 @@ const allLong = passwords.every(pw => pw.length >= 8);
 console.log(hasLong, allLong);
 
 // 3. 関数を定義
-
+// テスト
 
 // 4. イベントリスナー
