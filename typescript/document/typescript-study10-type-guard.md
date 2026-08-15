@@ -158,6 +158,96 @@ function describe(content: Content): string {
 
 ---
 
+## 5. アサーション関数（`asserts`）— 型ガードとの違い
+
+ここまでの型ガードは、いずれも Union 型を**分岐**させるための仕組み（`if (...) {...} else {...}` で両方の枝を扱う）。
+
+一方、`T | null` のように「本来あるべき型」と「あってはいけない異常値」の組み合わせを扱うときは、分岐ではなく**除外**したいことが多い。そこで使うのがアサーション関数。
+
+```ts
+function assertIsString(value: unknown): asserts value is string {
+  if (typeof value !== "string") {
+    throw new Error("string ではありません");
+  }
+}
+
+function print(value: unknown) {
+  assertIsString(value);
+  console.log(value.toUpperCase()); // ここでは string 確定（else 不要）
+}
+```
+
+戻り値の型が `value is string`（型ガード）ではなく `asserts value is string` になっている点がポイント。呼び出し側は `if` で結果を使う必要はなく、**呼んだだけで**以降のスコープが絞り込まれる。
+
+### 型ガードとアサーション関数の使い分け
+
+| | 型ガード（`is`） | アサーション関数（`asserts`） |
+|---|---|---|
+| 戻り値 | `boolean` | `void`（条件を満たさなければ例外を投げる） |
+| 呼び出し側 | `if (isFoo(x)) {...} else {...}` の分岐が必要 | 呼ぶだけで以降絞り込まれる、分岐不要 |
+| 向いている場面 | 複数の意味のある型を**判定**したいとき（`Dog` か `Cat` か） | 「本来あるべき型」以外を**異常値として排除**したいとき（`T \| null` から null を弾く） |
+
+### 練習4
+
+`querySelector` は `Element | null` を返す。null なら例外を投げ、以降 non-null （T | null（T かもしれないし null かもしれない型）から null の可能性を取り除いた状態、つまり「確実に T 型である」という意味）として扱えるアサーション関数を書いてください。
+
+```ts
+function assertExists<T>(value: T | null, name: string): asserts value is T {
+  // TODO
+}
+
+const input = document.querySelector<HTMLInputElement>('#city-input');
+assertExists(input, '#city-input');
+input.value; // ここでエラーが出ないことを確認
+```
+
+### 3つの方法の具体例
+
+`T | null` を non-null にする方法は、アサーション関数以外にも2つある。同じ `document.querySelector` の例で3つを比較する。
+
+**① 非nullアサーション（`!`）**
+
+「絶対に存在する」と型チェッカーに伝えるだけで、実行時のチェックは何も行われない。
+
+```ts
+const input = document.querySelector<HTMLInputElement>('#city-input')!;
+input.value; // コンパイルは通るが、実際に null だったら実行時エラーになる
+```
+
+**② nullガード（早期リターン / throw）**
+
+呼び出し箇所ごとに `if` を書いて分岐させる。型ガードと同じ「分岐」の形。
+
+```ts
+const input = document.querySelector<HTMLInputElement>('#city-input');
+if (!input) {
+  throw new Error('#city-input が見つかりません');
+}
+input.value; // ここでは input は HTMLInputElement 確定
+```
+
+**③ アサーション関数（`asserts`）**
+
+チェック処理を関数に切り出して使い回せる。呼んだ後は `if` なしで絞り込まれる。
+
+```ts
+function assertExists<T>(value: T | null, name: string): asserts value is T {
+  if (value === null) throw new Error(`${name} が見つかりません`);
+}
+
+const input = document.querySelector<HTMLInputElement>('#city-input');
+assertExists(input, '#city-input');
+input.value; // ここでは input は HTMLInputElement 確定
+```
+
+| 方法 | 実行時チェック | 書く場所 | 向いている場面 |
+|---|---|---|---|
+| 非nullアサーション（`!`） | なし（自己申告のみ） | 使う箇所ごとに `!` を書く | 存在が確実で、チェックコストを省きたいとき |
+| nullガード（`if` + `throw`） | あり | 使う箇所ごとに `if` を書く | 1〜2箇所だけの単発チェック |
+| アサーション関数（`asserts`） | あり | 関数として1回定義、あとは呼ぶだけ | 同じチェックを何度も繰り返すとき（例：DOM要素を11個取得する場合） |
+
+---
+
 ## まとめ
 
 | 手法 | 使いどころ |
@@ -165,6 +255,7 @@ function describe(content: Content): string {
 | `typeof` | プリミティブ型（string / number / boolean など） |
 | `in` | オブジェクト型・プロパティの有無で判定 |
 | カスタム型ガード（`is`） | 複雑な条件・再利用したい判定をカプセル化する |
+| アサーション関数（`asserts`） | `T \| null` などから異常値を排除し、以降 non-null として扱いたいとき |
 
 ---
 

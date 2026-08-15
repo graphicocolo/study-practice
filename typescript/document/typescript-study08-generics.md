@@ -14,6 +14,40 @@
 
 ---
 
+## ジェネリクスを一言で言うと
+
+「型を後から差し込むための、型の引数」
+
+関数や変数の型そのものを固定せず、呼び出す側が使うときに具体的な型を渡して決められる仕組み
+
+ジェネリクスは「関数・クラス・型そのもの」に対して付ける、という点がポイント
+
+```ts
+// コード例
+const cityInput = document.querySelector<HTMLInputElement>('#city-input');
+
+// これ↓は間違い
+// const  cityInput<HTMLInputElement> = document.querySelector('#city-input');
+// 理由は、ジェネリクスは「関数」に対して指定するものであって、「変数」に対して指定するものではないから
+
+// document.querySelector の型定義（TSの内部）はざっくりこうなっている
+// querySelector<E extends Element = Element>(selectors: string): E | null;
+// - E という型パラメータ（ジェネリクス）を持つ関数
+// - 呼び出すとき <HTMLInputElement> と書くと、この E に HTMLInputElement が代入される
+// - その結果、戻り値の型が HTMLInputElement | null になる
+// つまり querySelector<HTMLInputElement>(...) は「この関数を呼ぶときは、返ってくる型を HTMLInputElement として扱ってね」と関数に指示している、というイメージ
+
+// <> をつけないとどうなるか
+// const cityInput = document.querySelector('#city-input');
+// // 型は Element | null
+// querySelector はセレクタが '#city-input' という文字列だけでは、それが <input> なのか <div>なのか判断できません（TSはCSSセレクタの中身までは解析しません）。
+// そのため何も指定しないと、汎用的な Element | null 型になってしまい、cityInput.value のような HTMLInputElement 特有のプロパティにアクセスしようとするとエラーになる
+
+// ジェネリクスで <HTMLInputElement> と明示することで、「これは実際には input 要素だから、.value が使えるはず」と型情報を補ってあげている
+```
+
+---
+
 ## やること
 
 ### ① `Array<T>` を読む
